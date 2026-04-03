@@ -53,17 +53,17 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .sval{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
 .g{color:var(--success);}.y{color:var(--warn);}.r{color:var(--danger);}.b{color:var(--info);}
 /* ── SHOP PANEL LIGHT MODE ── */
-#panel-shop{background:#F7F8FA;border-radius:16px;padding:24px 20px;margin-top:-4px;}
+#panel-shop{background:#13141F;border-radius:16px;padding:24px 20px;margin-top:-4px;}
 #panel-shop .filter-row{margin-bottom:20px;}
-#panel-shop .fbtn{background:#fff;border:1.5px solid #E2E5EA;color:#555;border-radius:24px;font-size:13px;padding:7px 18px;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.06);}
-#panel-shop .fbtn.active{background:#111;border-color:#111;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+#panel-shop .fbtn{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);border-radius:24px;font-size:13px;padding:7px 18px;font-weight:500;}
+#panel-shop .fbtn.active{background:#fff;border-color:#fff;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .shop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
-.shop-title{font-size:13px;font-weight:700;color:#888;letter-spacing:.06em;text-transform:uppercase;}
-.shop-count{font-size:12px;color:#AAA;}
+.shop-title{font-size:13px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase;}
+.shop-count{font-size:12px;color:rgba(255,255,255,.35);}
 /* PRODUCT GRID - EC風 */
 .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
-.pcard{background:#fff;border:none;border-radius:16px;padding:0;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07);transition:box-shadow .2s,transform .2s;position:relative;animation:fu .35s ease both;display:flex;flex-direction:column;}
-.pcard:hover{box-shadow:0 8px 28px rgba(0,0,0,.13);transform:translateY(-3px);}
+.pcard{background:#1E2235;border:none;border-radius:16px;padding:0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.18);transition:box-shadow .2s,transform .2s;position:relative;animation:fu .35s ease both;display:flex;flex-direction:column;}
+.pcard:hover{box-shadow:0 10px 32px rgba(0,0,0,.28);transform:translateY(-3px);}
 .pcard.sold{opacity:.55;}.pcard.sold:hover{transform:none;box-shadow:0 2px 12px rgba(0,0,0,.07);}
 /* カードヘッダー（カラーバー） */
 .pcard-header{height:6px;width:100%;background:linear-gradient(90deg,#4F8EF7,#7B5EF8);}
@@ -76,26 +76,26 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .pcard-header.cat-magazine{background:linear-gradient(90deg,#F7F76E,#A5F76E);}
 .pcard-header.cat-other{background:linear-gradient(90deg,#C0C0C0,#E0E0E0);}
 /* カードボディ */
-.pcard-body{padding:18px 18px 16px;flex:1;display:flex;flex-direction:column;}
-.pcat-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#EEF2FF;color:#4F46E5;border-radius:6px;padding:3px 10px;margin-bottom:10px;}
-.pname{font-family:'M PLUS Rounded 1c','BIZ UDPGothic',sans-serif;font-size:16px;font-weight:700;color:#1C1C1E !important;margin-bottom:8px;line-height:1.5;letter-spacing:.01em;}
+.pcard-body{padding:18px 18px 16px;flex:1;display:flex;flex-direction:column;background:#1E2235;}
+.pcat-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);border-radius:6px;padding:3px 10px;margin-bottom:10px;}
+.pname{font-family:'M PLUS Rounded 1c','BIZ UDPGothic',sans-serif;font-size:16px;font-weight:700;color:#FFFFFF !important;margin-bottom:8px;line-height:1.5;letter-spacing:.01em;}
 /* JAN・URL */
-.pjan{font-size:11px;color:#888;margin-bottom:5px;display:flex;align-items:center;gap:6px;background:#F8F8F8;padding:4px 8px;border-radius:6px;}
-.pjan strong{color:#333;font-family:monospace;letter-spacing:.06em;font-size:12px;}
+.pjan{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:5px;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);padding:4px 8px;border-radius:6px;}
+.pjan strong{color:rgba(255,255,255,.85);font-family:monospace;letter-spacing:.06em;font-size:12px;}
 .purl{margin-bottom:10px;}
-.purl a{font-size:12px;color:#4F8EF7;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:500;}
+.purl a{font-size:12px;color:rgba(150,200,255,.9);text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:500;}
 .purl a:hover{text-decoration:underline;}
 /* 価格 */
 .pprice-row{display:flex;align-items:baseline;gap:4px;margin-bottom:14px;}
-.pprice{font-family:'M PLUS Rounded 1c','BIZ UDPGothic',sans-serif;font-size:21px;font-weight:800;color:#C0392B !important;line-height:1;}
-.pprice-unit{font-size:12px;color:#C0392B;font-weight:500;opacity:.75;}
+.pprice{font-family:'M PLUS Rounded 1c','BIZ UDPGothic',sans-serif;font-size:21px;font-weight:800;color:#FFFFFF !important;line-height:1;}
+.pprice-unit{font-size:12px;color:#FFFFFF;font-weight:500;opacity:.75;}
 /* 在庫バー */
 .bar-wrap{margin-bottom:14px;}
 .bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
-.bl{font-size:11px;color:#888;font-weight:500;}
+.bl{font-size:11px;color:rgba(255,255,255,.55);font-weight:500;}
 .bv{font-size:13px;font-weight:700;font-family:'BIZ UDPGothic',sans-serif;}
 .bv.ok{color:#16A34A;font-size:13px;}.bv.low{color:#D97706;font-size:13px;}.bv.zero{color:#DC2626;font-size:13px;}
-.bar{height:5px;background:#EAECEF;border-radius:5px;overflow:hidden;}
+.bar{height:5px;background:rgba(255,255,255,.15);border-radius:5px;overflow:hidden;}
 .bf{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.4,0,.2,1);}
 .bf.ok{background:linear-gradient(90deg,#16A34A,#22C55E);}
 .bf.low{background:linear-gradient(90deg,#D97706,#F59E0B);}
