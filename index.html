@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>STOCK.PRO</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0A0A0F;--surface:#13131A;--surface2:#1C1C26;--surface3:#26263A;
@@ -17,7 +17,7 @@
   --info:#5B9CF6;--idim:rgba(91,156,246,0.12);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+body{font-family:'BIZ UDPGothic','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* HEADER */
 header{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;background:var(--surface);position:sticky;top:0;z-index:200;}
@@ -68,18 +68,18 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .pcard.sold{opacity:.42;}.pcard.sold:hover{transform:none;}
 @keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .pcat{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
-.pname{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;line-height:1.3;}
-.pprice{font-size:18px;font-weight:700;color:var(--accent);margin-bottom:13px;font-family:'Syne',sans-serif;}
+.pname{font-family:'BIZ UDPGothic','Noto Sans JP',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;line-height:1.3;}
+.pprice{font-size:18px;font-weight:700;color:var(--accent);margin-bottom:13px;font-family:'BIZ UDPGothic','Noto Sans JP',sans-serif;}
 .pprice span{font-size:11px;color:var(--muted);font-family:'Noto Sans JP';font-weight:400;}
 .bar-wrap{margin-bottom:12px;}
 .bar-top{display:flex;justify-content:space-between;margin-bottom:5px;}
 .bl{font-size:11px;color:var(--muted);}
-.bv{font-size:12px;font-weight:700;}
+.bv{font-size:13px;font-weight:700;font-family:'BIZ UDPGothic','Noto Sans JP',sans-serif;}
 .bv.ok{color:var(--success);}.bv.low{color:var(--warn);}.bv.zero{color:var(--danger);}
 .bar{height:3px;background:var(--border);border-radius:3px;overflow:hidden;}
 .bf{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1);}
 .bf.ok{background:var(--success);}.bf.low{background:var(--warn);}.bf.zero{background:var(--danger);}
-.obtn{width:100%;padding:9px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:opacity .15s,transform .1s;}
+.obtn{width:100%;padding:9px;background:var(--accent);color:#000;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'BIZ UDPGothic','Noto Sans JP',sans-serif;transition:opacity .15s,transform .1s;}
 .obtn:hover{opacity:.87;}.obtn:active{transform:scale(.97);}
 .obtn:disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;}
 .pbadge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.06em;}
@@ -435,8 +435,8 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
     <div class="mfield"><label>Discord ID</label><input type="text" id="m-discord" placeholder="username#1234"></div>
     <div class="mfield"><label>備考・ご要望</label><textarea id="m-note" placeholder="カラー指定・梱包希望など"></textarea></div>
     <div class="agree-box">
-      ・商品購入代行の依頼締結後、商品購入後のキャンセルはできません。<br>
-      ・本サービスは商品購入を確約するものではありません。<br>
+      ・商品予約、購入後のキャンセルはできかねます。<br>
+      ・商品によって別途送料が発生します。<br>
       ・ご入力の個人情報は配送・連絡目的のみに使用します。
       <label class="agree-chk">
         <input type="checkbox" id="m-agree">
@@ -862,8 +862,15 @@ async function updateStock(id) {
   try {
     const r = await gasPost({ action:'updateStock', productId:id, stock:v });
     if (r?.error) throw new Error(r.error);
-    showToast('在庫数を更新しました');
-    loadProducts();
+    // ローカルのproductsを即時更新して購入者画面に反映
+    const p = products.find(x => x.id == id);
+    if (p) {
+      p.stock = v;
+      p.remain = v - Number(p.reserved);
+      renderAll();
+    }
+    showToast('在庫数を更新しました（スプレッドシートにも反映済み）');
+    loadProducts(); // GASから最新データを再取得
   } catch (e) { showToast('更新失敗: ' + e.message, true); }
 }
 async function resetReserved(id) {
