@@ -991,6 +991,7 @@ async function saveEdit() {
     const r = await gasPost({ action:'editProduct', productId:id, name, category:cat, price, stock, jan, url });
     if (r?.error) throw new Error(r.error);
     closeOverlay('edit-overlay');
+    renderAll();
     showToast('商品情報を更新しました');
     loadProducts();
   } catch (e) { showToast('更新失敗: ' + e.message, true); }
@@ -1025,12 +1026,12 @@ async function updateStock(id) {
     // ローカルのproductsを即時更新して購入者画面に反映
     const p = products.find(x => x.id == id);
     if (p) {
-      p.stock    = v;
-      p.reserved = Number(p.reserved || 0);
+      p.stock    = r.stock    !== undefined ? r.stock    : v;
+      p.reserved = r.reserved !== undefined ? r.reserved : Number(p.reserved || 0);
       renderAll();
     }
     showToast('在庫数・残数を更新しました');
-    await loadProducts(); // GASから最新データを再取得
+    loadProducts();
   } catch (e) { showToast('更新失敗: ' + e.message, true); }
 }
 async function resetReserved(id) {
