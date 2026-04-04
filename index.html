@@ -1023,14 +1023,16 @@ async function updateStock(id) {
   try {
     const r = await gasPost({ action:'updateStock', productId:id, stock:v });
     if (r?.error) throw new Error(r.error);
-    // ローカルのproductsを即時更新して購入者画面に反映
+    // GASが返した確定値でローカルを更新
     const p = products.find(x => x.id == id);
     if (p) {
-      p.stock    = r.stock    !== undefined ? r.stock    : v;
-      p.reserved = r.reserved !== undefined ? r.reserved : Number(p.reserved || 0);
-      renderAll();
+      p.stock    = Number(r.stock    ?? v);
+      p.reserved = Number(r.reserved ?? p.reserved ?? 0);
+      // remain は remain(p) 関数が stock-reserved で自動計算するので更新不要
     }
+    renderAll();
     showToast('在庫数・残数を更新しました');
+    // GASから最新データを再取得（renderAllの後に非同期で実行）
     loadProducts();
   } catch (e) { showToast('更新失敗: ' + e.message, true); }
 }
