@@ -52,6 +52,16 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .slabel{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
 .sval{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;}
 .g{color:var(--success);}.y{color:var(--warn);}.r{color:var(--danger);}.b{color:var(--info);}
+/* ── 送料表パネル ── */
+#panel-shipping{background:#F7F8FA;border-radius:16px;padding:24px 20px;margin-top:-4px;}
+.shipping-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:16px;}
+.shipping-table th{background:#1A1A2E;color:#fff;padding:8px 6px;text-align:center;font-size:11px;white-space:nowrap;}
+.shipping-table td{padding:7px 6px;text-align:center;border:1px solid #E2E5EA;font-size:12px;color:#333;}
+.shipping-table tr:nth-child(even) td{background:#F7F8FA;}
+.shipping-table td:first-child{font-weight:700;background:#EEF2FF;color:#4F46E5;white-space:nowrap;}
+.shipping-table td:nth-child(2){background:#F5F5F5;color:#666;font-size:11px;}
+.size-badge{display:inline-block;background:#1A1A2E;color:#C8FF00;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;margin-bottom:4px;}
+.region-note{font-size:11px;color:#666;margin-top:6px;line-height:1.8;}
 /* ── SHOP PANEL LIGHT MODE ── */
 #panel-shop{background:#13141F;border-radius:16px;padding:24px 20px;margin-top:-4px;}
 #panel-shop .filter-row{margin-bottom:20px;}
@@ -286,6 +296,7 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
   </div>
   <div class="nav-tabs" id="nav-tabs">
     <button class="ntab active" id="tab-shop" onclick="switchPanel('shop')">購入者画面</button>
+    <button class="ntab" id="tab-shipping" onclick="switchPanel('shipping')">送料表</button>
     <button class="ntab" id="tab-admin" onclick="switchPanel('admin')" style="display:none">管理者画面</button>
   </div>
   <button class="lock-btn" id="lock-btn" onclick="handleLockClick()" title="管理者ログイン">
@@ -323,6 +334,45 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
   </div>
 
   <!-- ── 管理者パネル ── -->
+  <!-- 送料表パネル -->
+  <div class="panel" id="panel-shipping">
+    <div style="max-width:900px;margin:0 auto">
+      <div style="font-size:18px;font-weight:700;color:#1A1A2E;margin-bottom:6px">📦 送料表</div>
+      <div style="font-size:13px;color:#666;margin-bottom:16px">ヤマト運輸 宅急便（税込）※サイズは3辺合計</div>
+
+      <div style="overflow-x:auto">
+        <table class="shipping-table" id="shipping-table-el">
+          <thead>
+            <tr>
+              <th>サイズ</th>
+              <th>最大重量</th>
+              <th>北海道</th><th>北東北</th><th>南東北</th><th>関東</th>
+              <th>信越</th><th>北陸</th><th>中部</th><th>関西</th>
+              <th>中国</th><th>四国</th><th>九州</th><th>沖縄</th>
+            </tr>
+          </thead>
+          <tbody id="shipping-tbody">
+            <tr><td colspan="14" style="text-align:center;padding:20px;color:#999">読み込み中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="region-note">
+        <strong>地域区分</strong><br>
+        北海道：北海道　／　北東北：青森・岩手・秋田　／　南東北：宮城・山形・福島<br>
+        関東：茨城・栃木・群馬・埼玉・千葉・東京・神奈川・山梨　／　信越：新潟・長野　／　北陸：富山・石川・福井<br>
+        中部：岐阜・静岡・愛知・三重　／　関西：滋賀・京都・大阪・兵庫・奈良・和歌山<br>
+        中国：鳥取・島根・岡山・広島・山口　／　四国：徳島・香川・愛媛・高知<br>
+        九州：福岡・佐賀・長崎・熊本・大分・宮崎・鹿児島　／　沖縄：沖縄
+      </div>
+
+      <div style="margin-top:20px;background:#FFF7E6;border:1px solid #FCD34D;border-radius:8px;padding:14px 16px;font-size:12px;color:#92400E;">
+        ⚠️ ゴルフ宅急便・スキー宅急便をご利用の際は定価運賃が適用されます。<br>
+        送料は目安です。実際の送料は商品の重量・梱包サイズにより異なる場合があります。
+      </div>
+    </div>
+  </div>
+
   <div class="panel" id="panel-admin">
 
     <!-- 管理者サブナビ -->
@@ -398,13 +448,33 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 
     <!-- 注文ログ -->
     <div class="asub" id="asub-orders">
-      <div class="sec">注文ログ（ローカル）</div>
-      <div class="info-box"><strong>📋 全履歴はGoogleスプレッドシートの「注文ログ」シートに保存されています。</strong><br>ここには今のセッションの注文のみ表示されます。</div>
+      <div class="sec">
+        注文ログ
+        <button class="btn btn-i" onclick="loadOrdersForInvoice()" style="font-size:11px">↻ 最新データを取得</button>
+      </div>
+      <div class="info-box">
+        <strong>📋 商品入荷後に「📄 請求書発行」ボタンで自動送付できます。</strong><br>
+        サイズを選択すると住所から送料が自動計算されます。
+      </div>
       <div style="overflow-x:auto">
         <table class="tbl">
-          <thead><tr><th>日時</th><th>氏名</th><th>商品名</th><th>数量</th><th>種別</th><th>合計</th></tr></thead>
-          <tbody id="order-tbody"><tr><td colspan="6" class="no-data">まだ注文がありません</td></tr></tbody>
+          <thead><tr>
+            <th>日時</th><th>氏名</th><th>商品名</th><th>数量</th><th>種別</th><th>合計</th><th>請求書</th>
+          </tr></thead>
+          <tbody id="order-tbody"><tr><td colspan="7" class="no-data">「最新データを取得」をクリックしてください</td></tr></tbody>
         </table>
+      </div>
+      <div style="margin-top:28px">
+        <div class="sec">
+          発行済み請求書ログ
+          <button class="btn btn-i" onclick="loadInvoiceList()" style="font-size:11px">↻ 更新</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="tbl">
+            <thead><tr><th>請求書番号</th><th>発行日</th><th>氏名</th><th>商品名</th><th>合計</th><th>ステータス</th><th>PDF</th></tr></thead>
+            <tbody id="invoice-tbody"><tr><td colspan="7" class="no-data">まだ請求書がありません</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -828,6 +898,152 @@ function renderInventory() {
   }).join('') || '<tr><td colspan="10" class="no-data">商品がありません</td></tr>';
 }
 
+// ── 送料テーブル描画 ─────────────────────────────────
+const SHIPPING_TABLE_CLIENT = {
+  60:  {北海道:650,北東北:470,南東北:470,関東:470,信越:484,北陸:517,中部:517,関西:572,中国:737,四国:737,九州:878,沖縄:1760},
+  80:  {北海道:715,北東北:540,南東北:540,関東:573,信越:583,北陸:613,中部:613,関西:660,中国:814,四国:814,九州:965,沖縄:2376},
+  100: {北海道:880,北東北:660,南東北:660,関東:704,信越:704,北陸:847,中部:715,関西:880,中国:1100,四国:1100,九州:1364,沖縄:3014},
+  120: {北海道:1210,北東北:748,南東北:748,関東:770,信越:770,北陸:880,中部:880,関西:1100,中国:1320,四国:1320,九州:1551,沖縄:3663},
+  140: {北海道:1430,北東北:880,南東北:880,関東:880,信越:880,北陸:1100,中部:968,関西:1210,中国:1573,四国:1573,九州:1749,沖縄:4334},
+  160: {北海道:1650,北東北:1012,南東北:1012,関東:1012,信越:1012,北陸:1430,中部:1210,関西:1595,中国:1760,四国:1760,九州:1936,沖縄:4983},
+  180: {北海道:2310,北東北:1760,南東北:1760,関東:1760,信越:1760,北陸:2090,中部:2090,関西:2200,中国:2310,四国:2310,九州:2893,沖縄:6853},
+  200: {北海道:2695,北東北:2156,南東北:2156,関東:2156,信越:2156,北陸:2541,中部:2541,関西:2618,中国:2772,四国:2772,九州:3278,沖縄:7623}
+};
+const REGIONS = ['北海道','北東北','南東北','関東','信越','北陸','中部','関西','中国','四国','九州','沖縄'];
+const SIZES   = [60,80,100,120,140,160,180,200];
+const MAX_WEIGHT = {60:'2kg',80:'5kg',100:'10kg',120:'15kg',140:'20kg',160:'25kg',180:'30kg',200:'30kg'};
+
+function renderShippingTable() {
+  document.getElementById('shipping-tbody').innerHTML = SIZES.map(sz =>
+    '<tr>' +
+    '<td><span class="size-badge">' + sz + '</span></td>' +
+    '<td>' + MAX_WEIGHT[sz] + '以内</td>' +
+    REGIONS.map(r => '<td>¥' + (SHIPPING_TABLE_CLIENT[sz][r]||'-').toLocaleString() + '</td>').join('') +
+    '</tr>'
+  ).join('');
+}
+
+// ── 注文ログ（GAS取得） ──────────────────────────────
+let gasOrders = [];
+async function loadOrdersForInvoice() {
+  try {
+    const r = await gasGet({ action:'getOrdersForInvoice' });
+    if (r?.error) throw new Error(r.error);
+    gasOrders = r.orders || [];
+    renderGasOrderLog();
+  } catch(e) { showToast('注文ログ取得失敗: '+e.message, true); }
+}
+
+function renderGasOrderLog() {
+  document.getElementById('order-tbody').innerHTML = gasOrders.length === 0
+    ? '<tr><td colspan="7" class="no-data">注文がありません</td></tr>'
+    : gasOrders.slice().reverse().map(o => {
+      const btn = o.invoiced
+        ? '<span class="tag tag-ok" style="font-size:10px">発行済</span>'
+        : '<button class="btn btn-i" style="font-size:11px;padding:4px 10px" onclick='openInvoiceModal(' +
+          JSON.stringify({rowIndex:o.rowIndex,name:o.name,product:o.product,qty:o.qty,total:o.total,address:o.address||''}) +
+          ')">📄 請求書発行</button>';
+      return '<tr>' +
+        '<td style="font-size:11px">' + (o.datetime||'') + '</td>' +
+        '<td style="font-weight:700">' + o.name + '</td>' +
+        '<td>' + o.product + '</td>' +
+        '<td>' + o.qty + '個</td>' +
+        '<td><span class="tag ' + (o.type==='購入'?'tag-order':'tag-reserve') + '">' + (o.type||'') + '</span></td>' +
+        '<td>¥' + Number(o.total).toLocaleString() + '</td>' +
+        '<td>' + btn + '</td></tr>';
+    }).join('');
+}
+
+// ── 請求書発行モーダル ──────────────────────────────
+let _invData = {};
+function openInvoiceModal(data) {
+  _invData = data;
+  document.getElementById('inv-name').textContent    = data.name;
+  document.getElementById('inv-product').textContent = data.product;
+  document.getElementById('inv-qty').textContent     = data.qty + '個';
+  document.getElementById('inv-total').textContent   = '¥' + Number(data.total).toLocaleString();
+  document.getElementById('inv-size').value          = '80';
+  document.getElementById('inv-fee-preview').textContent = '';
+  document.getElementById('btn-invoice-submit').disabled = false;
+  document.getElementById('invoice-sending-msg').style.display = 'none';
+  calcFeePreview();
+  openOverlay('invoice-overlay');
+}
+
+function calcFeePreview() {
+  const size = parseInt(document.getElementById('inv-size').value);
+  const addr = _invData.address || '';
+  if (!addr) { document.getElementById('inv-fee-preview').textContent = '住所未登録'; return; }
+  const pref = addr.match(/(.+?[都道府県])/);
+  if (!pref) { document.getElementById('inv-fee-preview').textContent = '都道府県を特定できません'; return; }
+  const PREF_MAP = {
+    '北海道':'北海道','青森県':'北東北','岩手県':'北東北','秋田県':'北東北',
+    '宮城県':'南東北','山形県':'南東北','福島県':'南東北',
+    '茨城県':'関東','栃木県':'関東','群馬県':'関東','埼玉県':'関東',
+    '千葉県':'関東','東京都':'関東','神奈川県':'関東','山梨県':'関東',
+    '新潟県':'信越','長野県':'信越','富山県':'北陸','石川県':'北陸','福井県':'北陸',
+    '岐阜県':'中部','静岡県':'中部','愛知県':'中部','三重県':'中部',
+    '滋賀県':'関西','京都府':'関西','大阪府':'関西','兵庫県':'関西','奈良県':'関西','和歌山県':'関西',
+    '鳥取県':'中国','島根県':'中国','岡山県':'中国','広島県':'中国','山口県':'中国',
+    '徳島県':'四国','香川県':'四国','愛媛県':'四国','高知県':'四国',
+    '福岡県':'九州','佐賀県':'九州','長崎県':'九州','熊本県':'九州',
+    '大分県':'九州','宮崎県':'九州','鹿児島県':'九州','沖縄県':'沖縄'
+  };
+  const region = PREF_MAP[pref[1]];
+  const fee = region && SHIPPING_TABLE_CLIENT[size] ? SHIPPING_TABLE_CLIENT[size][region] : null;
+  const el = document.getElementById('inv-fee-preview');
+  if (fee) {
+    el.textContent = '→ ' + pref[1] + '（' + region + '）　推定送料：¥' + fee.toLocaleString();
+    el.style.color = '#00875A';
+  } else {
+    el.textContent = '送料を計算できません';
+    el.style.color = '#CC0000';
+  }
+}
+
+async function submitInvoice() {
+  const rowIndex = _invData.rowIndex;
+  const size     = parseInt(document.getElementById('inv-size').value);
+  document.getElementById('btn-invoice-submit').disabled = true;
+  document.getElementById('invoice-sending-msg').style.display = 'block';
+  try {
+    const r = await gasPost({ action:'generateInvoice', orderRowIndex:rowIndex, size });
+    if (r?.error) throw new Error(r.error);
+    closeOverlay('invoice-overlay');
+    showToast('請求書（' + r.invoiceNo + '）を発行・送信しました');
+    loadOrdersForInvoice();
+    loadInvoiceList();
+  } catch(e) {
+    showToast('発行失敗: '+e.message, true);
+    document.getElementById('btn-invoice-submit').disabled = false;
+    document.getElementById('invoice-sending-msg').style.display = 'none';
+  }
+}
+
+// ── 請求書ログ ──────────────────────────────────────
+async function loadInvoiceList() {
+  try {
+    const r = await gasGet({ action:'getInvoiceList' });
+    if (r?.error) throw new Error(r.error);
+    renderInvoiceList(r.invoices || []);
+  } catch(e) { showToast('請求書ログ取得失敗: '+e.message, true); }
+}
+function renderInvoiceList(invoices) {
+  document.getElementById('invoice-tbody').innerHTML = invoices.length === 0
+    ? '<tr><td colspan="7" class="no-data">まだ請求書がありません</td></tr>'
+    : invoices.slice().reverse().map(inv =>
+        '<tr>' +
+        '<td style="font-size:11px;font-family:monospace">' + inv.invoiceNo + '</td>' +
+        '<td style="font-size:11px">' + inv.issueDate + '</td>' +
+        '<td style="font-weight:700">' + inv.name + '</td>' +
+        '<td>' + inv.product + '</td>' +
+        '<td>¥' + Number(inv.total).toLocaleString() + '</td>' +
+        '<td><span class="tag tag-ok">' + (inv.status||'送信済') + '</span></td>' +
+        '<td><a href="' + inv.pdfUrl + '" target="_blank" style="color:var(--info);font-size:12px;text-decoration:none">📄 PDF</a></td>' +
+        '</tr>'
+      ).join('');
+}
+
 function renderOrderLog() {
   document.getElementById('order-tbody').innerHTML = orderLog.length === 0
     ? '<tr><td colspan="6" class="no-data">まだ注文がありません</td></tr>'
@@ -1002,9 +1218,15 @@ async function addProduct() {
 
 // ── パネル切替 ────────────────────────────────────
 function switchPanel(id) {
-  document.querySelectorAll('.ntab').forEach((t, i) => t.classList.toggle('active', (id==='shop'&&i===0)||(id==='admin'&&i===1)));
+  document.querySelectorAll('.ntab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-' + id);
+  if (tab) tab.classList.add('active');
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
+  if (id === 'shipping' && !window._shippingLoaded) {
+    renderShippingTable();
+    window._shippingLoaded = true;
+  }
 }
 function switchAdmin(id, el) {
   document.querySelectorAll('.anav').forEach(t => t.classList.remove('active'));
@@ -1162,6 +1384,55 @@ async function changePassword() {
       <button class="btn btn-primary" style="flex:2" onclick="changePassword()">変更する</button>
     </div>
   </div>
+
+<!-- 請求書発行モーダル -->
+<div class="overlay" id="invoice-overlay" onclick="closeOverlayOutside(event,'invoice-overlay')">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-title">📄 請求書を発行する</div>
+    <div class="modal-sub">商品入荷確定後、顧客へPDF請求書をメール送信します</div>
+
+    <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="color:var(--muted)">氏名</span><span id="inv-name" style="font-weight:700"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="color:var(--muted)">商品名</span><span id="inv-product"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="color:var(--muted)">数量</span><span id="inv-qty"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="color:var(--muted)">税込金額</span><span id="inv-total" style="font-weight:700;color:var(--accent)"></span>
+      </div>
+    </div>
+
+    <div class="mfield">
+      <label>梱包サイズ（3辺合計）</label>
+      <select id="inv-size" onchange="calcFeePreview()" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px">
+        <option value="60">60サイズ（3辺60cm以内・2kg以内）</option>
+        <option value="80" selected>80サイズ（3辺80cm以内・5kg以内）</option>
+        <option value="100">100サイズ（3辺100cm以内・10kg以内）</option>
+        <option value="120">120サイズ（3辺120cm以内・15kg以内）</option>
+        <option value="140">140サイズ（3辺140cm以内・20kg以内）</option>
+        <option value="160">160サイズ（3辺160cm以内・25kg以内）</option>
+        <option value="180">180サイズ（3辺180cm以内・30kg以内）</option>
+        <option value="200">200サイズ（3辺200cm以内・30kg以内）</option>
+      </select>
+      <div id="inv-fee-preview" style="margin-top:6px;font-size:12px;font-weight:700"></div>
+    </div>
+
+    <div style="background:var(--wdim);border:1px solid rgba(255,184,0,.3);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--warn)">
+      ⚠️ 発行後、顧客のメールアドレスへ請求書PDFが自動送信されます。金額を必ず確認してください。
+    </div>
+
+    <div class="mactions">
+      <button class="btn btn-cancel" onclick="closeOverlay('invoice-overlay')">キャンセル</button>
+      <button class="btn btn-primary" style="flex:2" id="btn-invoice-submit" onclick="submitInvoice()">📄 請求書を発行・送信する</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;display:none" id="invoice-sending-msg">請求書を生成中...</div>
+  </div>
+</div>
+
 </div>
 
 </body>
