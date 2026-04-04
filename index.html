@@ -793,7 +793,7 @@ async function loadProducts() {
 }
 
 // ── ヘルパー ──────────────────────────────────────
-function remain(p) { return Math.max(0, Number(p.stock) - Number(p.reserved)); }
+function remain(p) { return Math.max(0, p.remain !== undefined ? Number(p.remain) : Number(p.stock)); }
 function stockState(p) { const r = remain(p); return r <= 0 ? 'zero' : r <= 5 ? 'low' : 'ok'; }
 function pct(p) { return p.stock === 0 ? 0 : Math.round((remain(p) / p.stock) * 100); }
 
@@ -1028,7 +1028,7 @@ async function updateStock(id) {
     if (p) {
       p.stock    = Number(r.stock    ?? v);
       p.reserved = Number(r.reserved ?? p.reserved ?? 0);
-      // remain は remain(p) 関数が stock-reserved で自動計算するので更新不要
+      p.remain   = Number(r.remain   ?? r.stock ?? v); // 残数=在庫数
     }
     renderAll();
     showToast('在庫数・残数を更新しました');
