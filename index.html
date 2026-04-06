@@ -155,14 +155,62 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .type-btn{flex:1;padding:10px;border:2px solid var(--border2);background:var(--bg);color:var(--text);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;}
 .type-btn.active{border-color:var(--accent);background:var(--accent);color:#000;}
 /* ── 購入フォームページ ──*/
-#panel-checkout{background:#F7F8FA;border-radius:16px;padding:20px 16px;}
-.checkout-layout{display:grid;grid-template-columns:1fr 320px;gap:20px;max-width:900px;margin:0 auto;}
-@media(max-width:700px){.checkout-layout{grid-template-columns:1fr;}}
-.checkout-form-box{background:#fff;border:1px solid #E2E5EA;border-radius:12px;padding:20px 24px;}
-.checkout-title{font-size:15px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid #E2E5EA;}
-.checkout-order-box{background:#fff;border:1px solid #E2E5EA;border-radius:12px;padding:16px;position:sticky;top:20px;}
-.checkout-order-item{display:flex;justify-content:space-between;align-items:flex-start;font-size:13px;padding:8px 0;border-bottom:1px solid #f0f0f0;}
+/* ── チェックアウト（白基調・通販サイト風） ── */
+#panel-checkout{background:#F0F2F5;padding:24px 16px;border-radius:0;}
+.checkout-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;max-width:920px;margin:0 auto;}
+@media(max-width:720px){.checkout-layout{grid-template-columns:1fr;}}
+
+/* 左：フォーム */
+.checkout-form-box{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden;margin-bottom:12px;}
+.checkout-section{padding:20px 24px;border-bottom:1px solid #F0F2F5;}
+.checkout-section:last-child{border-bottom:none;}
+.checkout-title{font-size:13px;font-weight:700;color:#1A1A2E;letter-spacing:.05em;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.checkout-title::before{content:'';display:block;width:4px;height:16px;background:#1A1A2E;border-radius:2px;}
+.co-field{margin-bottom:14px;}
+.co-field label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px;}
+.co-field label .req-mark{color:#E53E3E;margin-left:3px;}
+.co-field input,.co-field textarea,.co-field select{
+  width:100%;padding:10px 12px;border:1.5px solid #D1D5DB;border-radius:6px;
+  font-size:14px;color:#1C1C1E;background:#fff;outline:none;
+  font-family:'Noto Sans JP','BIZ UDPGothic',sans-serif;transition:border-color .15s;
+}
+.co-field input:focus,.co-field textarea:focus{border-color:#1A1A2E;box-shadow:0 0 0 3px rgba(26,26,46,.08);}
+.co-field input::placeholder{color:#C0C4CC;font-size:13px;}
+.co-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:480px){.co-row{grid-template-columns:1fr;}}
+.co-zip-row{display:grid;grid-template-columns:140px 1fr;gap:12px;}
+@media(max-width:480px){.co-zip-row{grid-template-columns:1fr;}}
+.co-agree-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:14px 16px;font-size:12px;color:#78350F;line-height:1.9;}
+.co-agree-chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:#1C1C1E;cursor:pointer;}
+.co-agree-chk input{width:16px;height:16px;accent-color:#1A1A2E;flex-shrink:0;}
+.co-submit-btn{
+  width:100%;padding:15px;background:#1A1A2E;color:#C8FF00;
+  border:none;border-radius:8px;font-size:16px;font-weight:800;
+  cursor:pointer;letter-spacing:.05em;transition:opacity .15s;margin-top:4px;
+}
+.co-submit-btn:hover{opacity:.88;}
+.co-submit-btn:disabled{background:#9CA3AF;color:#fff;cursor:not-allowed;}
+.co-back-btn{
+  width:100%;padding:12px;background:#fff;color:#555;border:1.5px solid #D1D5DB;
+  border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px;
+}
+.co-back-btn:hover{background:#F9FAFB;}
+.co-error-box{background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:10px 14px;font-size:12px;color:#B91C1C;margin-bottom:12px;display:none;}
+
+/* 右：注文確認 */
+.checkout-order-box{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);padding:0;position:sticky;top:20px;overflow:hidden;}
+.co-order-hdr{background:#1A1A2E;color:#fff;padding:14px 18px;font-size:13px;font-weight:700;letter-spacing:.05em;}
+.co-order-body{padding:16px 18px;}
+.checkout-order-item{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #F3F4F6;}
 .checkout-order-item:last-child{border-bottom:none;}
+.co-item-name{font-size:13px;font-weight:600;color:#1C1C1E;margin-bottom:2px;}
+.co-item-sub{font-size:11px;color:#9CA3AF;}
+.co-item-price{font-size:13px;font-weight:700;color:#1C1C1E;white-space:nowrap;}
+.co-sum-area{border-top:2px solid #F3F4F6;margin-top:4px;padding-top:12px;}
+.co-sum-row{display:flex;justify-content:space-between;font-size:13px;color:#6B7280;margin-bottom:8px;}
+.co-sum-row.total{font-size:16px;font-weight:800;color:#1C1C1E;border-top:1px solid #E5E7EB;padding-top:12px;margin-top:4px;}
+.co-sum-row.total span:last-child{color:#E53E3E;}
+.co-security{display:flex;align-items:center;gap:6px;font-size:11px;color:#9CA3AF;margin-top:14px;padding-top:12px;border-top:1px solid #F3F4F6;}
 
 #panel-shipping{background:#F7F8FA;border-radius:16px;padding:24px 20px;}
 .ship-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:14px;}
@@ -408,61 +456,111 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 
   <!-- ── 購入フォームパネル ── -->
   <div class="panel" id="panel-checkout">
-    <div style="max-width:900px;margin:0 auto">
-      <div style="font-size:17px;font-weight:700;color:#1A1A2E;margin-bottom:16px">📋 お客様情報の入力</div>
+    <div style="max-width:920px;margin:0 auto;padding-bottom:40px">
+      <div style="font-size:20px;font-weight:800;color:#1A1A2E;margin-bottom:20px;padding-left:2px">
+        ご購入手続き
+      </div>
       <div class="checkout-layout">
-        <!-- 左：入力フォーム -->
+
+        <!-- 左：フォーム -->
         <div>
+          <!-- お客様情報 -->
           <div class="checkout-form-box">
-            <div class="checkout-title">お客様情報</div>
-            <div class="mfield req"><label>氏名（フルネーム）</label><input type="text" id="co-name" placeholder="山田 太郎"></div>
-            <div class="mrow">
-              <div class="mfield req"><label>電話番号</label><input type="tel" id="co-phone" placeholder="090-0000-0000"></div>
-              <div class="mfield req"><label>メールアドレス</label><input type="email" id="co-email" placeholder="example@mail.com"></div>
+            <div class="checkout-section">
+              <div class="checkout-title">お客様情報</div>
+              <div class="co-field">
+                <label>氏名（フルネーム）<span class="req-mark">*</span></label>
+                <input type="text" id="co-name" placeholder="山田 太郎">
+              </div>
+              <div class="co-row">
+                <div class="co-field">
+                  <label>電話番号<span class="req-mark">*</span></label>
+                  <input type="tel" id="co-phone" placeholder="090-0000-0000">
+                </div>
+                <div class="co-field">
+                  <label>メールアドレス<span class="req-mark">*</span></label>
+                  <input type="email" id="co-email" placeholder="example@mail.com">
+                </div>
+              </div>
+              <div class="co-zip-row">
+                <div class="co-field">
+                  <label>郵便番号<span class="req-mark">*</span></label>
+                  <input type="text" id="co-zip" placeholder="000-0000" maxlength="8">
+                </div>
+                <div class="co-field">
+                  <label>都道府県・市区町村・番地<span class="req-mark">*</span></label>
+                  <input type="text" id="co-address" placeholder="東京都〇〇区〇〇 1-2-3">
+                </div>
+              </div>
+              <div class="co-field">
+                <label>Discord ID　<span style="font-weight:400;color:#9CA3AF">（任意）</span></label>
+                <input type="text" id="co-discord" placeholder="username#1234">
+              </div>
+              <div class="co-field">
+                <label>備考・ご要望　<span style="font-weight:400;color:#9CA3AF">（任意）</span></label>
+                <textarea id="co-note" placeholder="カラー指定・梱包希望など" rows="3" style="resize:vertical"></textarea>
+              </div>
             </div>
-            <div class="mrow">
-              <div class="mfield req" style="max-width:160px"><label>郵便番号</label><input type="text" id="co-zip" placeholder="000-0000" maxlength="8"></div>
-              <div class="mfield req"><label>都道府県・市区町村・番地</label><input type="text" id="co-address" placeholder="東京都〇〇区〇〇 1-2-3"></div>
+
+            <!-- 注意事項 -->
+            <div class="checkout-section">
+              <div class="checkout-title">注意事項・同意</div>
+              <div class="co-agree-box">
+                ・商品予約購入後のキャンセルはできかねます。<br>
+                ・商品によって別途送料が発生します。<br>
+                ・ご入力の個人情報は配送・連絡目的のみに使用します。<br>
+                ・お支払い案内は商品入荷確定後、Discordにて請求書を発行いたします。<br>
+                ・仕入先の在庫状況によってキャンセルになる場合がございます。
+                <label class="co-agree-chk">
+                  <input type="checkbox" id="co-agree">
+                  <span>上記注意事項をすべて確認し、同意します</span>
+                </label>
+              </div>
             </div>
-            <div class="mfield"><label>Discord ID</label><input type="text" id="co-discord" placeholder="username#1234"></div>
-            <div class="mfield"><label>備考・ご要望</label><textarea id="co-note" placeholder="カラー指定・梱包希望など"></textarea></div>
-            <div class="agree-box">
-              ・商品予約、購入後のキャンセルはできかねます。<br>
-              ・商品によって別途送料が発生します。<br>
-              ・ご入力の個人情報は配送・連絡目的のみに使用します。<br>
-              ・お支払い案内は商品入荷確定後、Discordにて請求書を発行いたします。<br>
-              ・仕入先の在庫状況によってキャンセルになる場合がございます。
-              <label class="agree-chk">
-                <input type="checkbox" id="co-agree">
-                <span>上記注意事項をすべて確認し、同意します</span>
-              </label>
+
+            <!-- ボタン -->
+            <div class="checkout-section">
+              <div class="co-error-box" id="co-error"></div>
+              <button class="co-submit-btn" id="co-submit-btn" onclick="submitCartOrder()">
+                注文を確定する →
+              </button>
+              <div style="font-size:12px;color:#9CA3AF;text-align:center;margin-top:10px;display:none" id="co-submitting">
+                ⏳ 送信中...しばらくお待ちください
+              </div>
+              <button class="co-back-btn" onclick="switchPanel('cart')" style="margin-top:10px">
+                ← カートに戻る
+              </button>
             </div>
-            <div id="co-error" style="font-size:12px;color:var(--danger);margin-bottom:12px;display:none"></div>
-            <div class="mactions">
-              <button class="btn btn-cancel" onclick="switchPanel('cart')">← カートに戻る</button>
-              <button class="btn btn-primary" style="flex:2" id="co-submit-btn" onclick="submitCartOrder()">注文を確定する →</button>
-            </div>
-            <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;display:none" id="co-submitting">送信中...</div>
           </div>
         </div>
+
         <!-- 右：注文確認 -->
         <div>
           <div class="checkout-order-box">
-            <div style="font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #E2E5EA">注文内容確認</div>
-            <div id="co-order-summary"></div>
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E2E5EA">
-              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:#555">
-                <span>商品小計</span><span id="co-subtotal">¥0</span>
+            <div class="co-order-hdr">🛒 注文内容の確認</div>
+            <div class="co-order-body">
+              <div id="co-order-summary"></div>
+              <div class="co-sum-area">
+                <div class="co-sum-row">
+                  <span>商品小計</span><span id="co-subtotal">¥0</span>
+                </div>
+                <div class="co-sum-row">
+                  <span>うち消費税（10%）</span><span id="co-tax">¥0</span>
+                </div>
+                <div class="co-sum-row">
+                  <span>送料</span><span style="font-size:12px;color:#9CA3AF">入荷後に確定</span>
+                </div>
+                <div class="co-sum-row total">
+                  <span>合計（税込）</span><span id="co-total">¥0</span>
+                </div>
               </div>
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;color:#888">
-                <span>うち消費税</span><span id="co-tax">¥0</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;padding-top:8px;border-top:1px solid #E2E5EA">
-                <span>合計（税込）</span><span id="co-total" style="color:#E53E3E">¥0</span>
+              <div class="co-security">
+                🔒 お客様の個人情報は安全に管理されます
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -1200,11 +1298,11 @@ function renderCheckoutSummary() {
     const typeLabel = '予約購入';
     return '<div class="checkout-order-item">' +
       '<div>' +
-        '<div style="font-weight:600;font-size:13px">' + item.name + '</div>' +
-        (item.jan ? '<div style="font-size:10px;color:#999">(' + item.jan + ')</div>' : '') +
-        '<div style="font-size:11px;color:#888">' + typeLabel + ' × ' + item.qty + '個</div>' +
+        '<div class="co-item-name">' + item.name + '</div>' +
+        (item.jan ? '<div class="co-item-sub">(' + item.jan + ')</div>' : '') +
+        '<div class="co-item-sub">' + typeLabel + ' × ' + item.qty + '個</div>' +
       '</div>' +
-      '<div style="font-weight:700;font-size:13px;color:#E53E3E">¥' + (item.price * item.qty).toLocaleString() + '</div>' +
+      '<div class="co-item-price">¥' + (item.price * item.qty).toLocaleString() + '</div>' +
     '</div>';
   }).join('');
 }
