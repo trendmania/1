@@ -651,7 +651,7 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
           <div class="ff"><label>参考URL（任意）</label><input type="text" id="f-url" placeholder="https://example.com/item"></div>
         </div>
         <div style="margin-top:10px">
-          <div class="ff"><label>納期目安（任意）</label><input type="text" id="f-delivery" placeholder="例：2026年5月中旬 / 入荷次第発送"></div>
+          <div class="ff"><label>納期目安（任意）</label><input type="date" id="f-delivery"></div>
         </div>
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
           <button class="btn btn-primary" onclick="addProduct()">➕ 商品を追加する</button>
@@ -837,7 +837,7 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
       <div class="mfield"><label>JANコード</label><input type="text" id="edit-jan" placeholder="例：4901234567890"></div>
       <div class="mfield"><label>参考URL</label><input type="text" id="edit-url" placeholder="https://example.com/item"></div>
     </div>
-    <div class="mfield"><label>納期目安（任意）</label><input type="text" id="edit-delivery" placeholder="例：2026年5月中旬 / 入荷次第発送"></div>
+    <div class="mfield"><label>納期目安（任意）</label><input type="date" id="edit-delivery"></div>
     <div class="mactions">
       <button class="btn btn-cancel" onclick="closeOverlay('edit-overlay')">キャンセル</button>
       <button class="btn btn-primary" style="flex:2" onclick="saveEdit()">変更を保存する</button>
@@ -1063,7 +1063,13 @@ function renderShop() {
     const janHtml = p.jan
       ? '<div class="pjan">JAN <strong>' + p.jan + '</strong></div>' : '';
     const deliveryHtml = p.delivery
-      ? '<div class="pdelivery">📅 納期目安：<strong>' + p.delivery + '</strong></div>' : '';
+      ? (function(d){
+          try {
+            const dt = new Date(d);
+            const str = dt.getFullYear() + '年' + (dt.getMonth()+1) + '月' + dt.getDate() + '日';
+            return '<div class="pdelivery">📅 納期目安：<strong>' + str + '</strong></div>';
+          } catch(e) { return ''; }
+        })(p.delivery) : '';
     const urlHtml = p.url
       ? '<div class="purl"><a href="' + p.url + '" target="_blank" rel="noopener">🔗 商品ページを見る</a></div>' : '';
     const stockLabel = r <= 0 ? '在庫切れ' : r <= 5 ? '残り' + r + '個' : r + '個';
