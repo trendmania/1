@@ -85,6 +85,7 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .purl{margin-bottom:10px;}
 .purl a{font-size:12px;color:#2563EB;text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-weight:500;}
 .purl a:hover{text-decoration:underline;}
+.pdelivery{font-size:12px;color:#D97706;margin-bottom:8px;background:#FFFBEB;border:1px solid #FDE68A;padding:4px 8px;border-radius:6px;}
 /* 価格 */
 .pprice-row{display:flex;align-items:baseline;gap:4px;margin-bottom:14px;}
 .pprice{font-family:'M PLUS Rounded 1c','BIZ UDPGothic',sans-serif;font-size:24px;font-weight:800;color:#E53E3E !important;line-height:1;}
@@ -493,6 +494,10 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
                 </div>
               </div>
               <div class="co-field">
+                <label>建物名・部屋番号　<span style="font-weight:400;color:#9CA3AF">（任意）</span></label>
+                <input type="text" id="co-building" placeholder="〇〇マンション 101号室">
+              </div>
+              <div class="co-field">
                 <label>Discord ID　<span style="font-weight:400;color:#9CA3AF">（任意）</span></label>
                 <input type="text" id="co-discord" placeholder="username#1234">
               </div>
@@ -644,6 +649,9 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
           <div class="ff"><label>JANコード（任意）</label><input type="text" id="f-jan" placeholder="例：4901234567890"></div>
           <div class="ff"><label>参考URL（任意）</label><input type="text" id="f-url" placeholder="https://example.com/item"></div>
+        </div>
+        <div style="margin-top:10px">
+          <div class="ff"><label>納期目安（任意）</label><input type="text" id="f-delivery" placeholder="例：2026年5月中旬 / 入荷次第発送"></div>
         </div>
         <div style="margin-top:16px;display:flex;gap:10px;align-items:center">
           <button class="btn btn-primary" onclick="addProduct()">➕ 商品を追加する</button>
@@ -829,6 +837,7 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
       <div class="mfield"><label>JANコード</label><input type="text" id="edit-jan" placeholder="例：4901234567890"></div>
       <div class="mfield"><label>参考URL</label><input type="text" id="edit-url" placeholder="https://example.com/item"></div>
     </div>
+    <div class="mfield"><label>納期目安（任意）</label><input type="text" id="edit-delivery" placeholder="例：2026年5月中旬 / 入荷次第発送"></div>
     <div class="mactions">
       <button class="btn btn-cancel" onclick="closeOverlay('edit-overlay')">キャンセル</button>
       <button class="btn btn-primary" style="flex:2" onclick="saveEdit()">変更を保存する</button>
@@ -1053,6 +1062,8 @@ function renderShop() {
       : r <= 5 ? '<div class="pbadge low-badge">残りわずか</div>' : '';
     const janHtml = p.jan
       ? '<div class="pjan">JAN <strong>' + p.jan + '</strong></div>' : '';
+    const deliveryHtml = p.delivery
+      ? '<div class="pdelivery">📅 納期目安：<strong>' + p.delivery + '</strong></div>' : '';
     const urlHtml = p.url
       ? '<div class="purl"><a href="' + p.url + '" target="_blank" rel="noopener">🔗 商品ページを見る</a></div>' : '';
     const stockLabel = r <= 0 ? '在庫切れ' : r <= 5 ? '残り' + r + '個' : r + '個';
@@ -1063,6 +1074,7 @@ function renderShop() {
       + '<span class="pcat-tag">' + p.category + '</span>'
       + '<div class="pname">' + p.name + '</div>'
       + janHtml
+      + deliveryHtml
       + urlHtml
       + '<div class="pprice-row"><span class="pprice">¥' + Number(p.price).toLocaleString() + '</span><span class="pprice-unit">/ 個</span></div>'
       + '<div class="bar-wrap">'
@@ -1317,8 +1329,9 @@ async function submitCartOrder() {
   const email   = document.getElementById('co-email').value.trim();
   const zip     = document.getElementById('co-zip').value.trim();
   const addrRaw = document.getElementById('co-address').value.trim();
-  const discord = document.getElementById('co-discord').value.trim();
-  const note    = document.getElementById('co-note').value.trim();
+  const building = document.getElementById('co-building') ? document.getElementById('co-building').value.trim() : '';
+  const discord  = document.getElementById('co-discord').value.trim();
+  const note     = document.getElementById('co-note').value.trim();
 
   if (!name || !phone || !email || !zip || !addrRaw) {
     showError('co-error', '必須項目（*）をすべて入力してください'); return;
@@ -1338,7 +1351,7 @@ async function submitCartOrder() {
       const r = await gasPost({
         action: 'submitOrder',
         productId: item.id,
-        name, phone, email, address, discord, note,
+        name, phone, email, address, building, discord, note,
         qty: item.qty,
         type: 'order'
       });
@@ -1366,7 +1379,7 @@ async function submitCartOrder() {
     document.getElementById('co-submit-btn').disabled = false;
     document.getElementById('co-submitting').style.display = 'none';
     // リセット
-    ['co-name','co-phone','co-email','co-zip','co-address','co-discord','co-note'].forEach(id => {
+    ['co-name','co-phone','co-email','co-zip','co-address','co-building','co-discord','co-note'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
@@ -1510,6 +1523,7 @@ function openEditModal(id) {
   document.getElementById('edit-stock').value = p.stock;
   document.getElementById('edit-jan').value = p.jan || '';
   document.getElementById('edit-url').value = p.url || '';
+  document.getElementById('edit-delivery').value = p.delivery || '';
   openOverlay('edit-overlay');
 }
 async function saveEdit() {
@@ -1518,11 +1532,12 @@ async function saveEdit() {
   const cat   = document.getElementById('edit-cat').value;
   const price = parseInt(document.getElementById('edit-price').value);
   const stock = parseInt(document.getElementById('edit-stock').value);
-  const jan   = document.getElementById('edit-jan').value.trim();
-  const url   = document.getElementById('edit-url').value.trim();
+  const jan      = document.getElementById('edit-jan').value.trim();
+  const url      = document.getElementById('edit-url').value.trim();
+  const delivery = document.getElementById('edit-delivery').value.trim();
   if (!name || isNaN(price) || isNaN(stock)) { showToast('すべての項目を入力してください', true); return; }
   try {
-    const r = await gasPost({ action:'editProduct', productId:id, name, category:cat, price, stock, jan, url });
+    const r = await gasPost({ action:'editProduct', productId:id, name, category:cat, price, stock, jan, url, delivery });
     if (r?.error) throw new Error(r.error);
     closeOverlay('edit-overlay');
     renderAll();
@@ -1587,13 +1602,14 @@ async function addProduct() {
   const cat   = document.getElementById('f-cat').value;
   const price = parseInt(document.getElementById('f-price').value);
   const stock = parseInt(document.getElementById('f-stock').value);
-  const jan   = document.getElementById('f-jan').value.trim();
-  const url   = document.getElementById('f-url').value.trim();
+  const jan      = document.getElementById('f-jan').value.trim();
+  const url      = document.getElementById('f-url').value.trim();
+  const delivery = document.getElementById('f-delivery').value.trim();
   if (!name || isNaN(price) || isNaN(stock)) { showToast('すべての項目を入力してください', true); return; }
   try {
-    const r = await gasPost({ action:'addProduct', name, category:cat, price, stock, jan, url });
+    const r = await gasPost({ action:'addProduct', name, category:cat, price, stock, jan, url, delivery });
     if (r?.error) throw new Error(r.error);
-    ['f-name','f-price','f-stock','f-jan','f-url'].forEach(i => document.getElementById(i).value = '');
+    ['f-name','f-price','f-stock','f-jan','f-url','f-delivery'].forEach(i => document.getElementById(i).value = '');
     showToast('商品を追加しました');
     loadProducts();
   } catch (e) { showToast('追加失敗: ' + e.message, true); }
