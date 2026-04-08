@@ -1079,10 +1079,10 @@ function renderShop() {
       ? '<div class="pjan">JAN <strong>' + p.jan + '</strong></div>' : '';
     const typeBadge = p.type === '予約品'
       ? (function(d){
-          if (!d) return '<div class="pbadge" style="background:#7C3AED;color:#fff;top:14px;right:14px;left:auto">予約品</div>';
+          if (!d) return '<div class="pbadge" style="background:#7C3AED;color:#fff;top:14px;right:14px;left:auto">予約品（発売予定）</div>';
           const dt = new Date(d);
           const str = dt.getFullYear() + '/' + (dt.getMonth()+1) + '/' + dt.getDate();
-          return '<div class="pbadge" style="background:#7C3AED;color:#fff;top:14px;right:14px;left:auto">予約品-' + str + '</div>';
+          return '<div class="pbadge" style="background:#7C3AED;color:#fff;top:14px;right:14px;left:auto">予約品-' + str + '（発売予定）</div>';
         })(p.arrivalDate)
       : '';
     const deliveryHtml = p.delivery
