@@ -1375,7 +1375,26 @@ async function submitCartOrder() {
   let allOk = true;
   const errors = [];
 
-  // カート内の商品を1件ずつ送信
+  // GASへ送信（全商品を1注文番号でまとめて）
+  try {
+    const r = await gasPost({
+      action: 'submitCartOrder',
+      items: cart.map(item => ({ productId: item.id, qty: item.qty })),
+      name, phone, email, address, building, discord, note
+    });
+    if (r?.error) { errors.push(r.error); allOk = false; }
+    else {
+      cart.forEach(item => {
+        const p = products.find(x => x.id == item.id);
+        if (p && p.type !== '予約品') {
+          p.reserved = Number(p.reserved) + item.qty;
+          p.remain   = Math.max(0, Number(p.remain) - item.qty);
+        }
+        const dt = new Date().toLocaleDateString('ja-JP') + ' ' + new Date().toTimeString().slice(0,5);
+        orderLog.push({ datetime: dt, name, productName: item.name, qty: item.qty, type: '予約購入', total: item.price * item.qty });
+      });
+    }
+  } catch(e) { errors.push(e.message); allOk = false; }
 
   localStorage.setItem('local_orders', JSON.stringify(orderLog));
 
