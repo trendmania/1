@@ -1238,7 +1238,8 @@ function renderInventory() {
       <td>
         <div style="display:flex;align-items:center;gap:6px">
           <input type="number" id="as-${p.id}" value="${p.stock}" min="0" style="width:65px">
-          <button class="btn btn-a" onclick="updateStock(${p.id})">更新</button>
+          <button class="btn btn-a" onclick="updateStock(${p.id}, false)">更新</button>
+          <button class="btn" style="font-size:11px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;border-radius:6px;padding:4px 8px;cursor:pointer;white-space:nowrap" onclick="updateStock(${p.id}, true)" title="在庫を増やし予約済数を0にリセット（再販売時）">🔄 再販売</button>
         </div>
       </td>
       <td style="color:var(--warn)">${p.reserved}</td>
@@ -1541,76 +1542,9 @@ function showError(id, msg) {
 }
 
 
-function renderInventory() {
-  document.getElementById('inv-tbody').innerHTML = products.map(p => {
-    const r = remain(p), st = stockState(p);
-    const tagClass = st === 'ok' ? 'tag-ok' : st === 'low' ? 'tag-low' : 'tag-zero';
-    const tagLabel = st === 'ok' ? '在庫あり' : st === 'low' ? '残りわずか' : '在庫切れ';
-    const urlCell = p.url
-      ? `<a href="${p.url}" target="_blank" rel="noopener" style="color:var(--info);font-size:11px;text-decoration:none">🔗 リンク</a>`
-      : '<span style="color:var(--muted);font-size:11px">—</span>';
-    return `<tr>
-      <td style="font-weight:500;max-width:160px">${p.name}</td>
-      <td>${p.category}</td>
-      <td>¥${Number(p.price).toLocaleString()}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:6px">
-          <input type="number" id="as-${p.id}" value="${p.stock}" min="0" style="width:65px">
-          <button class="btn btn-a" onclick="updateStock(${p.id})">更新</button>
-        </div>
-      </td>
-      <td style="color:var(--warn)">${p.reserved}</td>
-      <td style="font-family:'BIZ UDPGothic',sans-serif;font-weight:700;color:${r <= 0 ? 'var(--danger)' : r <= 5 ? 'var(--warn)' : 'var(--success)'}">${r}</td>
-      <td><span class="tag ${tagClass}">${tagLabel}</span></td>
-      <td style="font-size:12px;font-family:'BIZ UDPGothic',monospace;color:var(--text)">${p.jan || '<span style="color:var(--muted)">—</span>'}</td>
-      <td>${urlCell}</td>
-      <td>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn btn-i" onclick="openEditModal(${p.id})">✏️ 編集</button>
-          <button class="btn btn-d" onclick="openDeleteModal(${p.id})">🗑️ 削除</button>
-        </div>
-      </td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="10" class="no-data">商品がありません</td></tr>';
-}
 
-function renderOrderLog() {
-  document.getElementById('order-tbody').innerHTML = orderLog.length === 0
-    ? '<tr><td colspan="6" class="no-data">まだ注文がありません</td></tr>'
-    : orderLog.slice().reverse().map(l => `<tr>
-        <td>${l.datetime}</td>
-        <td style="font-weight:500">${l.name}</td>
-        <td>${l.productName}</td>
-        <td>${l.qty}個</td>
-        <td><span class="tag ${l.type === 'order' ? 'tag-order' : 'tag-reserve'}">${l.type === 'order' ? '購入' : '予約'}</span></td>
-        <td>¥${Number(l.total).toLocaleString()}</td>
-      </tr>`).join('');
-}
 
-function renderCatList() {
-  const cats = [...new Set(products.map(p => p.category))];
-  document.getElementById('cat-list').innerHTML = cats.map(c =>
-    `<span class="tag tag-ok" style="font-size:12px;padding:4px 12px">${c}</span>`
-  ).join('') || '<span style="font-size:12px;color:var(--muted)">商品を追加するとカテゴリが表示されます</span>';
-}
 
-// ── 注文モーダル ──────────────────────────────────
-function openOrderModal(id) {
-  const p = products.find(x => x.id == id);
-  currentPid = id;
-  const r = remain(p);
-  document.getElementById('m-cat').textContent = p.category;
-  document.getElementById('m-name').textContent = p.name;
-  document.getElementById('m-price').textContent = '¥' + Number(p.price).toLocaleString();
-  document.getElementById('m-remain-note').textContent = `残${r}個`;
-  document.getElementById('m-qty').max = r;
-  document.getElementById('m-qty').value = 1;
-  ['m-fullname','m-phone','m-email','m-zip','m-address','m-discord','m-note'].forEach(i => document.getElementById(i).value = '');
-  document.getElementById('m-agree').checked = false;
-  document.getElementById('btn-submit').disabled = false;
-  document.getElementById('submitting-msg').style.display = 'none';
-  openOverlay('order-overlay');
-}
 
 async function submitOrder() {
   if (!document.getElementById('m-agree').checked) { showToast('注意事項への同意が必要です', true); return; }
@@ -1783,21 +1717,22 @@ async function confirmDelete() {
 }
 
 // ── 在庫・予約操作 ────────────────────────────────
-async function updateStock(id) {
+async function updateStock(id, resetReserved = false) {
   const v = parseInt(document.getElementById('as-' + id).value);
   if (isNaN(v) || v < 0) return;
+  if (resetReserved && !confirm('予約済数をリセットして在庫を更新します。\n再販売を開始してよろしいですか？')) return;
   try {
-    const r = await gasPost({ action:'updateStock', productId:id, stock:v });
+    const r = await gasPost({ action:'updateStock', productId:id, stock:v, resetReserved });
     if (r?.error) throw new Error(r.error);
     // GASが返した確定値でローカルを更新
     const p = products.find(x => x.id == id);
     if (p) {
-      p.stock    = Number(r.stock    ?? v);
-      p.reserved = Number(r.reserved ?? p.reserved ?? 0);
-      p.remain   = Number(r.remain   ?? p.stock); // 残数=在庫数
+      p.stock    = Number(r.stock ?? v);
+      p.reserved = Number(r.reserved ?? 0);
+      p.remain   = Number(r.remain ?? v);
     }
     renderAll();
-    showToast('在庫数・残数を更新しました');
+    showToast(resetReserved ? '再販売開始：在庫・予約済数を更新しました' : '在庫数を更新しました');
     // GASから最新データを再取得（renderAllの後に非同期で実行）
     loadProducts();
   } catch (e) { showToast('更新失敗: ' + e.message, true); }
