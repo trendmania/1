@@ -224,6 +224,14 @@ main{max-width:1060px;margin:0 auto;padding:26px 18px;}
 .co-sum-row.total{font-size:16px;font-weight:800;color:#111;border-top:2px solid #E5E7EB;padding-top:12px;margin-top:4px;}
 .co-sum-row.total span:last-child{color:#E53E3E;}
 .co-security{display:flex;align-items:center;gap:6px;font-size:11px;color:#555;margin-top:14px;padding-top:12px;border-top:1px solid #E5E7EB;}
+/* ── 個口送料 ── */
+.pkg-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;background:var(--surface2);border-radius:8px;padding:8px 10px;margin-bottom:8px;}
+.pkg-label{font-size:12px;font-weight:700;color:var(--muted);white-space:nowrap;}
+.pkg-fee{font-size:12px;color:var(--success);font-weight:700;white-space:nowrap;min-width:70px;text-align:right;}
+.pkg-del{background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;}
+.pkg-total{background:var(--adim);border:1px solid rgba(255,153,0,.3);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.pkg-total-label{font-size:13px;font-weight:700;color:var(--text);}
+.pkg-total-val{font-size:18px;font-weight:800;color:var(--accent);}
 
 #panel-shipping{background:#F7F8FA;border-radius:16px;padding:24px 20px;}
 .ship-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:14px;}
@@ -1981,6 +1989,103 @@ function calcShippingClient(address, size) {
 // =========================================================
 // 注文ログ
 // =========================================================
+
+// ── 個口・送料計算 ──────────────────────────────
+let packages = [80]; // 個口リスト（デフォルト1個口・80サイズ）
+
+function addPackage() {
+  packages.push(80);
+  renderPackages();
+  calcTotalFee();
+}
+
+function removePackage(idx) {
+  if (packages.length <= 1) { showToast('最低1個口必要です', true); return; }
+  packages.splice(idx, 1);
+  renderPackages();
+  calcTotalFee();
+}
+
+function changePackageSize(idx, val) {
+  packages[idx] = parseInt(val);
+  calcTotalFee();
+  updatePkgFeeLabel(idx);
+}
+
+function renderPackages() {
+  const list = document.getElementById('pkg-list');
+  if (!list) return;
+  list.innerHTML = packages.map((sz, idx) => {
+    const fee = calcSingleFee(sz);
+    const feeStr = fee !== null ? '¥' + fee.toLocaleString() : '計算不可';
+    return `<div class="pkg-row" id="pkg-row-${idx}">
+      <span class="pkg-label">${idx+1}個口目</span>
+      <select onchange="changePackageSize(${idx}, this.value)"
+        style="padding:6px 8px;background:var(--bg);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-size:12px;width:100%">
+        <option value="60">60サイズ（2kg）</option>
+        <option value="80" >80サイズ（5kg）</option>
+        <option value="100">100サイズ（10kg）</option>
+        <option value="120">120サイズ（15kg）</option>
+        <option value="140">140サイズ（20kg）</option>
+        <option value="160">160サイズ（25kg）</option>
+        <option value="180">180サイズ（30kg）</option>
+        <option value="200">200サイズ（30kg）</option>
+      </select>
+      <span class="pkg-fee" id="pkg-fee-${idx}">${feeStr}</span>
+      <button class="pkg-del" onclick="removePackage(${idx})" title="削除">×</button>
+    </div>`;
+  }).join('');
+  // 選択状態を復元
+  packages.forEach((sz, idx) => {
+    const sel = document.querySelector(`#pkg-row-${idx} select`);
+    if (sel) sel.value = sz;
+  });
+}
+
+function calcSingleFee(size) {
+  if (!_invOrder) return null;
+  return calcShippingClient(_invOrder.address || '', size);
+}
+
+function updatePkgFeeLabel(idx) {
+  const el = document.getElementById('pkg-fee-' + idx);
+  if (!el) return;
+  const fee = calcSingleFee(packages[idx]);
+  el.textContent = fee !== null ? '¥' + fee.toLocaleString() : '計算不可';
+}
+
+function calcTotalFee() {
+  const fees = packages.map(sz => calcSingleFee(sz));
+  const hasNull = fees.some(f => f === null);
+  const total = fees.reduce((s, f) => s + (f || 0), 0);
+  const totalEl = document.getElementById('inv-fee-total');
+  const detailEl = document.getElementById('inv-fee');
+  if (totalEl) {
+    totalEl.textContent = hasNull ? '計算不可' : '¥' + total.toLocaleString();
+    totalEl.style.color = hasNull ? 'var(--danger)' : 'var(--accent)';
+  }
+  if (detailEl) {
+    if (!_invOrder?.address) {
+      detailEl.textContent = '※ 住所が未登録です';
+      detailEl.style.color = 'var(--warn)';
+    } else if (hasNull) {
+      detailEl.textContent = '都道府県を特定できない住所があります';
+      detailEl.style.color = 'var(--danger)';
+    } else {
+      const addr = _invOrder.address || '';
+      const cleanAddr = addr.replace(/[〒]?\d{3,4}-?\d{4}[\s　]*/,'').trim();
+      const m = cleanAddr.match(/([^ 　\d]+?[都道府県])/);
+      const pref = m ? m[1] : '';
+      detailEl.textContent = pref + 'あて　' + packages.length + '個口　¥' +
+        fees.map((f,i) => packages[i] + 'サイズ:¥' + (f||0).toLocaleString()).join(' + ');
+      detailEl.style.color = 'var(--muted)';
+    }
+  }
+  // 各個口のラベルも更新
+  packages.forEach((_, idx) => updatePkgFeeLabel(idx));
+  return hasNull ? null : total;
+}
+
 let gasOrders = [];
 async function loadOrdersForInvoice() {
   showToast('注文ログを取得中...');
@@ -2067,40 +2172,35 @@ function openInvModal(idx) {
   const total = _invOrder.total || (_invOrder.items||[]).reduce((s,i)=>s+i.subtotal,0);
   document.getElementById('inv-qty').textContent     = (_invOrder.items||[]).reduce((s,i)=>s+i.qty,0) + '個';
   document.getElementById('inv-total').textContent   = '¥' + Number(total).toLocaleString();
-  document.getElementById('inv-size').value = '80';
+  // 個口リストを初期化（1個口・80サイズ）
+  packages = [80];
+  renderPackages();
+  calcTotalFee();
   document.getElementById('btn-inv-submit').disabled = false;
   document.getElementById('inv-sending').style.display = 'none';
-  updateFeePreview();
   openOverlay('inv-overlay');
 }
-function updateFeePreview() {
-  const size = document.getElementById('inv-size').value;
-  const addr = _invOrder ? (_invOrder.address||'') : '';
-  const el   = document.getElementById('inv-fee');
-  if (!addr) { el.textContent = '※ 住所が未登録です'; el.style.color = 'var(--warn)'; return; }
-  const fee = calcShippingClient(addr, size);
-  const cleanAddr = addr.replace(/[〒]?\d{3,4}-?\d{4}[\s　]*/,'').trim();
-  const m   = cleanAddr.match(/([^ 　\d]+?[都道府県])/);
-  const ri  = m ? PREF_MAP[m[1]] : undefined;
-  if (fee !== null && ri !== undefined) {
-    el.textContent = '→ ' + (m?m[1]:'') + '（' + SHIP_REGIONS[ri] + '）　送料：¥' + fee.toLocaleString();
-    el.style.color = 'var(--success)';
-  } else {
-    el.textContent = '送料を計算できません'; el.style.color = 'var(--danger)';
-  }
-}
+// updateFeePreview → calcTotalFee に統合
 async function submitInvoice() {
   if (!_invOrder) return;
-  const size = parseInt(document.getElementById('inv-size').value);
+  // 個口送料を計算
+  const fees = packages.map(sz => calcSingleFee(sz));
+  if (fees.some(f => f === null)) {
+    showToast('送料を計算できない個口があります', true); return;
+  }
+  const totalShipping = fees.reduce((s, f) => s + f, 0);
+  const pkgDetails = packages.map((sz, i) => sz + 'サイズ:¥' + fees[i].toLocaleString()).join(' / ');
   document.getElementById('btn-inv-submit').disabled = true;
   document.getElementById('inv-sending').style.display = 'block';
   try {
     const r = await gasPost({
-      action: 'generateInvoice',
-      orderNo:    _invOrder.orderNo,
-      group:      _invOrder.group,
-      rowIndices: _invOrder.rowIndices,
-      size
+      action:      'generateInvoice',
+      orderNo:     _invOrder.orderNo,
+      group:       _invOrder.group,
+      rowIndices:  _invOrder.rowIndices,
+      shipping:    totalShipping,   // 個口合算送料
+      pkgDetails:  pkgDetails,      // 個口明細（ログ用）
+      pkgCount:    packages.length  // 個口数
     });
     if (r?.error) throw new Error(r.error);
     closeOverlay('inv-overlay');
@@ -2134,28 +2234,29 @@ async function loadInvoiceList() {
 
 <!-- 請求書発行モーダル -->
 <div class="overlay" id="inv-overlay" onclick="closeOverlayOutside(event,'inv-overlay')">
-  <div class="modal" style="max-width:440px">
+  <div class="modal" style="max-width:480px">
     <div class="modal-title">📄 請求書を発行する</div>
     <div class="modal-sub">商品入荷確定後、顧客へPDF請求書をメール送信します</div>
+    <!-- 注文情報 -->
     <div style="background:var(--surface2);border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">氏名</span><strong id="inv-name"></strong></div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">商品名</span><span id="inv-product"></span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">商品名</span><span id="inv-product" style="text-align:right;max-width:60%;white-space:pre-line"></span></div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--muted)">数量</span><span id="inv-qty"></span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">税込金額</span><strong id="inv-total" style="color:var(--accent)"></strong></div>
     </div>
+    <!-- 個口設定 -->
     <div class="mfield">
-      <label>梱包サイズ（3辺合計）</label>
-      <select id="inv-size" onchange="updateFeePreview()" style="width:100%;padding:9px 12px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:13px">
-        <option value="60">60サイズ（60cm以内・2kg以内）</option>
-        <option value="80" selected>80サイズ（80cm以内・5kg以内）</option>
-        <option value="100">100サイズ（100cm以内・10kg以内）</option>
-        <option value="120">120サイズ（120cm以内・15kg以内）</option>
-        <option value="140">140サイズ（140cm以内・20kg以内）</option>
-        <option value="160">160サイズ（160cm以内・25kg以内）</option>
-        <option value="180">180サイズ（180cm以内・30kg以内）</option>
-        <option value="200">200サイズ（200cm以内・30kg以内）</option>
-      </select>
-      <div id="inv-fee" style="margin-top:7px;font-size:12px;font-weight:700"></div>
+      <label style="display:flex;justify-content:space-between;align-items:center">
+        <span>梱包個口・サイズ設定</span>
+        <button class="btn btn-i" style="font-size:11px;padding:4px 10px" onclick="addPackage()">＋ 個口を追加</button>
+      </label>
+      <div id="pkg-list" style="margin-top:10px"></div>
+      <!-- 送料合計 -->
+      <div class="pkg-total">
+        <span class="pkg-total-label">送料合計</span>
+        <span class="pkg-total-val" id="inv-fee-total">¥0</span>
+      </div>
+      <div id="inv-fee" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
     </div>
     <div style="background:var(--wdim);border:1px solid rgba(255,184,0,.3);border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:12px;color:var(--warn)">
       ⚠️ 発行後、顧客のメールアドレスへ請求書PDFが自動送信されます。
